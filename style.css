@@ -12,7 +12,7 @@
         url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop');
     background-size: cover;
     background-position: center;
-    will-change: transform; /* Hint para GPU */
+    will-change: transform;
 }
 
 body {
@@ -24,7 +24,7 @@ body {
 /* 2. Componentes Glassmorphism (Cristal) */
 .glass-panel {
     background: rgba(15, 15, 25, 0.85);
-    backdrop-filter: blur(8px); /* Blur reducido para rendimiento */
+    backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -38,7 +38,6 @@ body {
     border-radius: 1rem;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     position: relative;
-    /* contain: content;  Optimización de renderizado */
 }
 
 .repo-card:hover {

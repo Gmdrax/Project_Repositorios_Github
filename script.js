@@ -21,6 +21,10 @@ tailwind.config = {
 // --- CONSTANTES ---
 const USERNAME = 'Gmdrax';
 const ITEMS_PER_PAGE = 9;
+const CACHE_KEY_USER = `gh_user_${USERNAME}`;
+const CACHE_KEY_REPOS = `gh_repos_${USERNAME}`;
+const CACHE_KEY_TIME = `gh_time_${USERNAME}`;
+const CACHE_DURATION = 15 * 60 * 1000; // 15 Minutos en milisegundos
 
 // --- VARIABLES DE ESTADO ---
 let allRepos = [];
@@ -44,44 +48,127 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 300));
 });
 
+// --- GESTIÓN DE CACHÉ ---
+function getCachedData() {
+    const timestamp = localStorage.getItem(CACHE_KEY_TIME);
+    const user = localStorage.getItem(CACHE_KEY_USER);
+    const repos = localStorage.getItem(CACHE_KEY_REPOS);
+
+    if (!timestamp || !user || !repos) return null;
+
+    const now = new Date().getTime();
+    // Si la caché es reciente (menos de 15 min), úsala
+    if (now - parseInt(timestamp) < CACHE_DURATION) {
+        return { user: JSON.parse(user), repos: JSON.parse(repos) };
+    }
+    return null; // Caché expirada, intentar fetch
+}
+
+function saveToCache(user, repos) {
+    try {
+        localStorage.setItem(CACHE_KEY_USER, JSON.stringify(user));
+        localStorage.setItem(CACHE_KEY_REPOS, JSON.stringify(repos));
+        localStorage.setItem(CACHE_KEY_TIME, new Date().getTime().toString());
+    } catch (e) {
+        console.warn('Storage lleno', e);
+    }
+}
+
+function getExpiredCache() {
+        // Fallback: Recuperar datos viejos si la API falla
+    const user = localStorage.getItem(CACHE_KEY_USER);
+    const repos = localStorage.getItem(CACHE_KEY_REPOS);
+    if (user && repos) {
+        return { user: JSON.parse(user), repos: JSON.parse(repos) };
+    }
+    return null;
+}
+
 // --- LÓGICA PRINCIPAL ---
 async function initApp() {
+    let user, repos;
+    const cached = getCachedData();
+
     try {
-        const [userRes, reposRes] = await Promise.all([
-            fetch(`https://api.github.com/users/${USERNAME}`),
-            fetch(`https://api.github.com/users/${USERNAME}/repos?per_page=100&sort=updated`)
-        ]);
+        if (cached) {
+            console.log('Cargando desde caché local...');
+            user = cached.user;
+            repos = cached.repos;
+        } else {
+            console.log('Consultando API GitHub...');
+            const [userRes, reposRes] = await Promise.all([
+                fetch(`https://api.github.com/users/${USERNAME}`),
+                fetch(`https://api.github.com/users/${USERNAME}/repos?per_page=100&sort=updated`)
+            ]);
 
-        if (!userRes.ok) throw new Error('Usuario no encontrado o límite de API excedido.');
+            // Manejo específico de Límite de API
+            if (userRes.status === 403 || reposRes.status === 403) {
+                throw new Error('API_LIMIT');
+            }
+            if (!userRes.ok) throw new Error('Usuario no encontrado');
 
-        const user = await userRes.json();
-        allRepos = await reposRes.json();
+            user = await userRes.json();
+            repos = await reposRes.json();
+            
+            // Guardar para la próxima
+            saveToCache(user, repos);
+        }
         
-        filteredRepos = allRepos;
-
-        renderProfile(user);
-        calculateStats(allRepos);
-        setupFilters(allRepos);
-        renderRepos(filteredRepos);
-
-        // Ocultar Loading suavemente
-        const loader = document.getElementById('loading');
-        loader.style.opacity = '0';
-        setTimeout(() => {
-            loader.style.display = 'none';
-            document.getElementById('main-content').style.opacity = '1';
-        }, 300);
+        // Renderizado Exitoso
+        processData(user, repos);
+        hideLoading();
 
     } catch (error) {
         console.error(error);
-        document.getElementById('loading').innerHTML = `
-            <div class="text-red-500 text-center px-4">
-                <p class="font-bold text-xl mb-2">¡Error de Conexión!</p>
-                <p class="text-sm opacity-80">${error.message}</p>
-                <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-red-500/20 text-red-500 border border-red-500 rounded text-xs uppercase font-bold">Reintentar</button>
-            </div>
-        `;
+        
+        // Si falla la API (Límite o Red), intentar cargar caché antigua
+        const expiredData = getExpiredCache();
+        
+        if (expiredData) {
+            showToast(); // Avisar al usuario
+            processData(expiredData.user, expiredData.repos);
+            hideLoading();
+        } else {
+            // Fallo total (Sin internet y sin caché)
+            showError(error.message === 'API_LIMIT' 
+                ? 'Límite de API de GitHub excedido. Intenta más tarde.' 
+                : 'Error de conexión. Revisa tu internet.');
+        }
     }
+}
+
+function processData(user, repos) {
+    allRepos = repos;
+    filteredRepos = allRepos;
+    renderProfile(user);
+    calculateStats(allRepos);
+    setupFilters(allRepos);
+    renderRepos(filteredRepos);
+}
+
+function showToast() {
+    const toast = document.getElementById('toast');
+    toast.classList.remove('hidden');
+    toast.classList.remove('translate-x-full');
+}
+
+function hideLoading() {
+    const loader = document.getElementById('loading');
+    loader.style.opacity = '0';
+    setTimeout(() => {
+        loader.style.display = 'none';
+        document.getElementById('main-content').style.opacity = '1';
+    }, 300);
+}
+
+function showError(msg) {
+    document.getElementById('loading').innerHTML = `
+        <div class="text-red-500 text-center px-4">
+            <p class="font-bold text-xl mb-2">¡Ups!</p>
+            <p class="text-sm opacity-80">${msg}</p>
+            <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-red-500/20 text-red-500 border border-red-500 rounded text-xs uppercase font-bold">Reintentar</button>
+        </div>
+    `;
 }
 
 function renderProfile(user) {
@@ -108,7 +195,7 @@ function calculateStats(repos) {
     document.getElementById('top-lang').textContent = topLang;
 }
 
-// --- RENDERIZADO OPTIMIZADO CON FRAGMENTOS ---
+// --- RENDERIZADO ---
 function renderRepos(repos, append = false) {
     const grid = document.getElementById('repos-grid');
     const loadMoreBtn = document.getElementById('load-more-btn');
@@ -128,36 +215,24 @@ function renderRepos(repos, append = false) {
 
     if(append && itemsToShow.length === 0) return;
 
-    // Optimización: Usar DocumentFragment para reducir reflows
     const fragment = document.createDocumentFragment();
 
     itemsToShow.forEach((repo) => {
         const card = document.createElement('div');
         card.className = 'repo-card p-5 flex flex-col h-full cursor-pointer group';
         
-        // Color mapping
         const langColors = {
-            'JavaScript': '#facc15',
-            'TypeScript': '#3b82f6',
-            'Python': '#22c55e',
-            'HTML': '#f97316',
-            'CSS': '#3b82f6',
-            'Vue': '#42b883',
-            'React': '#61dafb'
+            'JavaScript': '#facc15', 'TypeScript': '#3b82f6', 'Python': '#22c55e',
+            'HTML': '#f97316', 'CSS': '#3b82f6', 'Vue': '#42b883', 'React': '#61dafb'
         };
         const langColor = langColors[repo.language] || '#ffffff';
         
-        // --- ARREGLO VISUALIZACIÓN WEB ---
         let hasWeb = false;
         let webUrl = '#';
         
         if (repo.homepage && repo.homepage.trim() !== "") {
             hasWeb = true;
-            webUrl = repo.homepage;
-            // Asegurar protocolo
-            if (!webUrl.startsWith('http')) {
-                webUrl = 'https://' + webUrl;
-            }
+            webUrl = repo.homepage.startsWith('http') ? repo.homepage : 'https://' + repo.homepage;
         }
 
         card.innerHTML = `
@@ -192,18 +267,15 @@ function renderRepos(repos, append = false) {
             </div>
         `;
         
-        // Prevenir abrir el modal si se clickean los botones
         card.onclick = (e) => {
             if(!e.target.closest('a')) openRepoViewer(repo);
         };
-        
         fragment.appendChild(card);
     });
 
     grid.appendChild(fragment);
     lucide.createIcons();
 
-    // Lógica Botón Mostrar Más
     if (visibleCount < repos.length) {
         loadMoreBtn.classList.remove('hidden');
     } else {
@@ -216,6 +288,7 @@ function renderRepos(repos, append = false) {
 function setupFilters(repos) {
     const languages = [...new Set(repos.map(r => r.language).filter(Boolean))];
     const container = document.getElementById('filter-container');
+    container.innerHTML = '<button class="filter-btn active bg-white text-black px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap border border-white" data-filter="all" onclick="filterByLang(\'all\', this)">Todos</button>';
 
     languages.forEach(lang => {
         const btn = document.createElement('button');
@@ -253,7 +326,7 @@ function handleSearch(term) {
     renderRepos(filteredRepos);
 }
 
-// --- VISOR DE CÓDIGO MEJORADO ---
+// --- VISOR DE CÓDIGO ---
 async function openRepoViewer(repo) {
     const modal = document.getElementById('modal');
     modal.classList.remove('hidden');
@@ -265,32 +338,32 @@ async function openRepoViewer(repo) {
     lucide.createIcons();
 
     try {
+        // AQUÍ TAMBIÉN APLICAMOS CACHÉ SI PODEMOS, PERO PARA SIMPLIFICAR
+        // SOLO CAPTURAREMOS EL ERROR SI LA API FALLA
         const res = await fetch(`https://api.github.com/repos/${USERNAME}/${repo.name}/git/trees/${repo.default_branch}?recursive=1`);
         
+        if (res.status === 403) throw new Error('API_LIMIT');
         if (!res.ok) throw new Error('Repo vacío o inaccesible');
         
         const data = await res.json();
         
         if (data.tree) {
-            // Ordenar: Carpetas primero, luego archivos
             const sorted = data.tree
-                .filter(i => i.type === 'blob') // Solo archivos por simplicidad visual
+                .filter(i => i.type === 'blob')
                 .sort((a, b) => a.path.localeCompare(b.path));
-                
             renderFileTree(sorted, repo.name, repo.default_branch);
         } else {
                 fileTree.innerHTML = '<div class="text-gray-500 p-4 text-center text-[10px]">Repositorio vacío</div>';
         }
     } catch (e) {
-        fileTree.innerHTML = '<div class="text-red-400 p-4 text-center text-[10px]">No se pudo cargar el árbol de archivos. (Límite API o Repo Vacío)</div>';
+        const msg = e.message === 'API_LIMIT' ? 'Límite API alcanzado' : 'Error al cargar';
+        fileTree.innerHTML = `<div class="text-red-400 p-4 text-center text-[10px]">${msg}</div>`;
     }
 }
 
 function renderFileTree(files, repoName, branch) {
     const container = document.getElementById('file-tree');
     container.innerHTML = '';
-    
-    // Fragmento para rendimiento en listas largas
     const fragment = document.createDocumentFragment();
 
     files.forEach(file => {
@@ -306,7 +379,6 @@ function renderFileTree(files, repoName, branch) {
 }
 
 async function loadFileContent(repoName, branch, path, element) {
-    // UI Selection
     document.querySelectorAll('#file-tree div').forEach(d => d.classList.remove('text-primary', 'bg-white/10'));
     element.classList.add('text-primary', 'bg-white/10');
     
@@ -315,9 +387,10 @@ async function loadFileContent(repoName, branch, path, element) {
 
     try {
         const res = await fetch(`https://api.github.com/repos/${USERNAME}/${repoName}/contents/${path}?ref=${branch}`);
-        const data = await res.json();
         
-        // DECODIFICACIÓN SEGURA
+        if (res.status === 403) throw new Error('API_LIMIT');
+        
+        const data = await res.json();
         let content = '';
         if (data.encoding === 'base64') {
             const binaryString = atob(data.content.replace(/\s/g, ''));
@@ -331,12 +404,11 @@ async function loadFileContent(repoName, branch, path, element) {
         }
 
         const escaped = content.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;','\'':'&#039;'}[m]));
-        
         viewer.innerHTML = `<pre class="font-mono text-[10px] text-gray-300 whitespace-pre-wrap break-words h-full overflow-auto custom-scroll p-2">${escaped}</pre>`;
         
     } catch (e) {
         console.error(e);
-        viewer.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-red-400 font-mono text-xs"><i data-lucide="alert-circle" class="mb-2"></i>Error al leer archivo</div>';
+        viewer.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-red-400 font-mono text-xs"><i data-lucide="alert-circle" class="mb-2"></i>Error (Límite API)</div>';
         lucide.createIcons();
     }
 }
