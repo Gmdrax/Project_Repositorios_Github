@@ -22,10 +22,10 @@
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
-                        primary: '#00f2ea', // Cyan eléctrico
-                        secondary: '#ff0050', // Rosa neón
-                        accent: '#7000ff', // Violeta
-                        darkbg: '#050510', // Fondo casi negro
+                        primary: '#00f2ea',
+                        secondary: '#ff0050',
+                        accent: '#7000ff',
+                        darkbg: '#050510',
                     },
                     animation: {
                         'float': 'float 6s ease-in-out infinite',
@@ -44,48 +44,40 @@
     <style>
         body {
             background-color: #050510;
-            background-image: 
-                linear-gradient(rgba(5, 5, 16, 0.85), rgba(5, 5, 16, 0.95)),
-                url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
+            /* Fondo optimizado: imagen estática oscura */
+            background-image: linear-gradient(rgba(5, 5, 16, 0.9), rgba(5, 5, 16, 0.95)), url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop');
             background-attachment: fixed;
+            background-size: cover;
             color: #ffffff;
             font-smoothing: antialiased;
         }
         
-        /* Panel Principal: Más sólido y oscuro para contraste */
+        /* Panel Principal: Blur solo en elementos grandes */
         .glass-panel {
-            background: rgba(15, 15, 25, 0.75); /* Más opaco */
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); /* Sombra fuerte */
-            border-radius: 2rem;
-            position: relative;
-            z-index: 10;
+            background: rgba(15, 15, 25, 0.85);
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border-radius: 1.5rem;
         }
 
-        /* Tarjetas: Alto contraste */
+        /* Tarjetas: Ligeras para rendimiento (sin backdrop-filter pesado) */
         .glass-card {
-            background: rgba(20, 20, 35, 0.85); /* Fondo muy oscuro para legibilidad */
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15); /* Borde visible */
-            border-radius: 1.5rem;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background: rgba(20, 20, 35, 0.95); /* Casi opaco para mejor rendimiento */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            transition: transform 0.2s ease, border-color 0.2s ease;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
         .glass-card:hover {
-            border-color: #00f2ea; /* Borde Cyan al hover */
-            transform: translateY(-5px) scale(1.02);
-            background: rgba(25, 25, 45, 0.95);
-            box-shadow: 0 15px 30px rgba(0, 242, 234, 0.15); /* Glow cyan */
+            border-color: #00f2ea;
+            transform: translateY(-4px);
+            z-index: 10;
         }
 
-        /* Tipografía de alto impacto */
         h1, h2, h3 {
             text-transform: uppercase;
             letter-spacing: -0.02em;
@@ -96,13 +88,11 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 20px rgba(0, 242, 234, 0.3));
         }
 
-        /* Inputs y Botones con alto contraste */
         .high-contrast-input {
             background: rgba(0, 0, 0, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
         }
         .high-contrast-input:focus {
@@ -110,180 +100,149 @@
             background: black;
         }
 
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #050510;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 5px;
-            border: 2px solid #050510;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #00f2ea;
-        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050510; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f2ea; }
     </style>
 </head>
 <body class="min-h-screen selection:bg-primary selection:text-black">
 
-    <!-- Loading Overlay -->
-    <div id="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-[#050510] transition-opacity duration-500">
+    <!-- Loading -->
+    <div id="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-[#050510] transition-opacity duration-300">
         <div class="text-center">
-            <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="text-white font-display uppercase tracking-widest text-lg animate-pulse">Cargando...</p>
+            <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-white font-display uppercase tracking-widest text-sm animate-pulse">Cargando...</p>
         </div>
     </div>
 
-    <!-- Main Container -->
-    <main class="container mx-auto px-4 py-8 max-w-7xl opacity-0 transition-opacity duration-700 relative z-10" id="main-content">
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 max-w-7xl opacity-0 transition-opacity duration-500" id="main-content">
         
-        <!-- Header Section -->
-        <header class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
-            
-            <!-- Profile Card -->
+        <!-- Header -->
+        <header class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+            <!-- Profile -->
             <div class="lg:col-span-4 xl:col-span-3 order-2 lg:order-1">
-                <div class="glass-panel p-8 text-center sticky top-6 border-t-4 border-t-primary bg-[#0a0a15]">
-                    <div class="relative mb-6 mx-auto w-40 h-40">
-                        <div class="absolute inset-0 bg-primary rounded-full blur-md opacity-50 animate-pulse"></div>
-                        <img id="avatar" src="" alt="Profile" class="relative w-full h-full rounded-full border-4 border-white object-cover shadow-2xl">
+                <div class="glass-panel p-6 text-center sticky top-6 border-t-4 border-t-primary bg-[#0a0a15]">
+                    <div class="relative mb-4 mx-auto w-32 h-32">
+                        <img id="avatar" src="" alt="Profile" class="w-full h-full rounded-full border-4 border-white/10 object-cover shadow-xl">
                     </div>
-                    
-                    <h1 id="name" class="font-display text-3xl mb-1 leading-none text-white tracking-wide"></h1>
-                    <p id="username" class="font-mono text-sm text-primary mb-6 bg-primary/10 border border-primary/30 px-4 py-1.5 rounded-full inline-block font-bold shadow-[0_0_15px_rgba(0,242,234,0.2)]"></p>
-                    
-                    <div class="flex gap-3 mb-8 justify-center w-full">
-                        <a id="github-link" href="#" target="_blank" class="w-full py-3 bg-white text-black font-black uppercase tracking-wider text-sm rounded-xl hover:bg-primary hover:scale-105 transition-all duration-200 shadow-lg flex items-center justify-center gap-2">
-                            <i data-lucide="github" class="w-5 h-5"></i> GitHub
+                    <h1 id="name" class="font-display text-2xl mb-1 text-white"></h1>
+                    <p id="username" class="font-mono text-xs text-primary mb-4 bg-primary/10 border border-primary/30 px-3 py-1 rounded-full inline-block font-bold"></p>
+                    <div class="flex gap-3 mb-6 justify-center w-full">
+                        <a id="github-link" href="#" target="_blank" class="w-full py-2.5 bg-white text-black font-black uppercase tracking-wider text-xs rounded-lg hover:bg-primary transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="github" class="w-4 h-4"></i> GitHub
                         </a>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-black/60 p-4 rounded-xl border border-white/10">
-                            <p class="text-[10px] uppercase font-bold tracking-widest text-gray-400 mb-1">Followers</p>
-                            <p id="followers" class="text-2xl font-display text-white">0</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-black/40 p-3 rounded-lg border border-white/5">
+                            <p class="text-[10px] uppercase font-bold text-gray-400">Followers</p>
+                            <p id="followers" class="text-xl font-display text-white">0</p>
                         </div>
-                        <div class="bg-black/60 p-4 rounded-xl border border-white/10">
-                            <p class="text-[10px] uppercase font-bold tracking-widest text-gray-400 mb-1">Following</p>
-                            <p id="following" class="text-2xl font-display text-white">0</p>
+                        <div class="bg-black/40 p-3 rounded-lg border border-white/5">
+                            <p class="text-[10px] uppercase font-bold text-gray-400">Following</p>
+                            <p id="following" class="text-xl font-display text-white">0</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Intro & Stats -->
+            <!-- Stats -->
             <div class="lg:col-span-8 xl:col-span-9 flex flex-col justify-center order-1 lg:order-2">
-                <div class="mb-8 glass-panel p-10 relative overflow-hidden border-l-4 border-l-secondary bg-gradient-to-r from-[rgba(20,20,35,0.9)] to-[rgba(10,10,20,0.8)]">
-                    <h2 class="font-display text-5xl md:text-7xl mb-4 leading-none relative z-10 drop-shadow-xl text-white">
+                <div class="mb-6 glass-panel p-8 border-l-4 border-l-secondary bg-gradient-to-r from-[rgba(20,20,35,0.9)] to-[rgba(10,10,20,0.8)]">
+                    <h2 class="font-display text-4xl md:text-6xl mb-2 text-white">
                         PORTAFOLIO <br>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary filter drop-shadow-[0_0_10px_rgba(0,242,234,0.5)]">GITHUB</span>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">GITHUB</span>
                     </h2>
-                    <p class="text-xl text-gray-200 max-w-2xl font-medium relative z-10 leading-relaxed">
-                        Explora mi colección de proyectos. <span class="text-primary font-bold">Código limpio, diseño moderno.</span>
+                    <p class="text-lg text-gray-300 max-w-2xl font-medium">
+                        Colección de proyectos optimizada. <span class="text-primary font-bold">Rápido y eficiente.</span>
                     </p>
                 </div>
 
-                <!-- Stats Grid (High Visibility) -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="glass-card p-5 flex flex-col items-center justify-center text-center h-40 border-b-4 border-b-primary">
-                        <div class="p-3 rounded-full bg-primary/10 mb-2 text-primary">
-                            <i data-lucide="code-2" class="h-8 w-8"></i>
-                        </div>
-                        <h3 id="total-repos" class="text-4xl font-display leading-none text-white mb-1">0</h3>
-                        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Repositorios</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="glass-card p-4 flex flex-col items-center justify-center text-center h-32 border-b-2 border-b-primary">
+                        <i data-lucide="code-2" class="h-6 w-6 text-primary mb-2"></i>
+                        <h3 id="total-repos" class="text-3xl font-display text-white">0</h3>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Repos</p>
                     </div>
-                    <div class="glass-card p-5 flex flex-col items-center justify-center text-center h-40 border-b-4 border-b-yellow-400">
-                        <div class="p-3 rounded-full bg-yellow-400/10 mb-2 text-yellow-400">
-                            <i data-lucide="star" class="h-8 w-8"></i>
-                        </div>
-                        <h3 id="total-stars" class="text-4xl font-display leading-none text-white mb-1">0</h3>
-                        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Estrellas</p>
+                    <div class="glass-card p-4 flex flex-col items-center justify-center text-center h-32 border-b-2 border-b-yellow-400">
+                        <i data-lucide="star" class="h-6 w-6 text-yellow-400 mb-2"></i>
+                        <h3 id="total-stars" class="text-3xl font-display text-white">0</h3>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Stars</p>
                     </div>
-                    <div class="glass-card p-5 flex flex-col items-center justify-center text-center h-40 border-b-4 border-b-secondary">
-                        <div class="p-3 rounded-full bg-secondary/10 mb-2 text-secondary">
-                            <i data-lucide="git-fork" class="h-8 w-8"></i>
-                        </div>
-                        <h3 id="total-forks" class="text-4xl font-display leading-none text-white mb-1">0</h3>
-                        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Forks</p>
+                    <div class="glass-card p-4 flex flex-col items-center justify-center text-center h-32 border-b-2 border-b-secondary">
+                        <i data-lucide="git-fork" class="h-6 w-6 text-secondary mb-2"></i>
+                        <h3 id="total-forks" class="text-3xl font-display text-white">0</h3>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Forks</p>
                     </div>
-                    <div class="glass-card p-5 flex flex-col items-center justify-center text-center h-40 border-b-4 border-b-accent">
-                        <div class="p-3 rounded-full bg-accent/10 mb-2 text-accent">
-                            <i data-lucide="terminal" class="h-8 w-8"></i>
-                        </div>
-                        <h3 id="top-lang" class="text-2xl font-display leading-none text-white mb-1 pt-2">...</h3>
-                        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Top Lenguaje</p>
+                    <div class="glass-card p-4 flex flex-col items-center justify-center text-center h-32 border-b-2 border-b-accent">
+                        <i data-lucide="terminal" class="h-6 w-6 text-accent mb-2"></i>
+                        <h3 id="top-lang" class="text-xl font-display text-white pt-1">...</h3>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Lenguaje</p>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- Search Bar -->
-        <div class="sticky top-6 z-30 mb-10">
-            <div class="glass-panel p-4 flex flex-col md:flex-row gap-4 items-center shadow-2xl bg-[#0a0a15]/90 border-2 border-white/5">
+        <!-- Search & Filters -->
+        <div class="sticky top-4 z-40 mb-8">
+            <div class="glass-panel p-3 flex flex-col md:flex-row gap-3 items-center shadow-2xl bg-[#0a0a15]/95">
                 <div class="relative flex-1 w-full group">
-                    <i data-lucide="search" class="absolute left-5 top-4 text-gray-400 group-focus-within:text-primary transition-colors w-5 h-5"></i>
+                    <i data-lucide="search" class="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-primary transition-colors w-4 h-4"></i>
                     <input 
                         type="text" 
                         id="search-input" 
                         placeholder="BUSCAR PROYECTO..." 
-                        class="high-contrast-input w-full rounded-full pl-14 pr-6 py-3.5 text-white placeholder-gray-500 font-bold uppercase tracking-wide text-sm shadow-inner"
+                        class="high-contrast-input w-full rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 font-bold uppercase tracking-wide text-xs shadow-inner focus:outline-none"
                     >
                 </div>
-                <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide px-1" id="filter-container">
-                    <button class="filter-btn active bg-white text-black px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider whitespace-nowrap shadow-lg hover:scale-105 border-2 border-white" data-filter="all">Todos</button>
+                <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-hide px-1" id="filter-container">
+                    <button class="filter-btn active bg-white text-black px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap border border-white" data-filter="all">Todos</button>
                     <!-- Filters via JS -->
                 </div>
             </div>
         </div>
 
         <!-- Repos Grid -->
-        <div id="repos-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
+        <div id="repos-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
             <!-- Repos via JS -->
         </div>
 
+        <!-- Pagination / Load More -->
+        <div class="text-center mb-16">
+            <button id="load-more-btn" class="hidden px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/20 rounded-xl text-xs font-bold uppercase tracking-widest transition-all text-white hover:border-primary hover:text-primary">
+                Cargar Más Proyectos
+            </button>
+            <p id="showing-count" class="mt-4 text-[10px] uppercase tracking-widest text-gray-500"></p>
+        </div>
+
         <!-- Footer -->
-        <footer class="text-center text-gray-500 py-10">
-            <div class="inline-block px-6 py-3 rounded-full bg-black/80 border border-white/10">
-                <p class="font-mono text-[10px] uppercase tracking-[0.3em] font-bold">Generado Automáticamente | &copy; <span id="year"></span></p>
-            </div>
+        <footer class="text-center text-gray-600 py-6 border-t border-white/5">
+            <p class="font-mono text-[10px] uppercase tracking-[0.2em]">&copy; <span id="year"></span> Generado Automáticamente</p>
         </footer>
     </main>
 
-    <!-- Code Viewer Modal -->
+    <!-- Modal (Code Viewer) -->
     <div id="modal" class="fixed inset-0 z-[100] hidden">
-        <div class="absolute inset-0 bg-black/95 backdrop-blur-xl transition-opacity" onclick="closeModal()"></div>
-        <div class="absolute inset-2 md:inset-10 glass-panel overflow-hidden flex flex-col shadow-2xl animate-fade-in border-2 border-white/10 bg-[#0f0c29]">
-            
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between p-6 border-b border-white/10 bg-[#050510]">
-                <div class="flex items-center gap-4">
-                    <div class="p-2 bg-primary rounded-lg text-black font-bold">
-                        <i data-lucide="github" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <h3 id="modal-title" class="font-display text-white text-2xl uppercase tracking-tight">Repository</h3>
-                        <p class="text-xs text-primary font-mono uppercase tracking-widest font-bold">Explorador de Archivos</p>
-                    </div>
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="absolute inset-2 md:inset-10 glass-panel overflow-hidden flex flex-col shadow-2xl animate-fade-in border border-white/10 bg-[#0f0c29]">
+            <div class="flex items-center justify-between p-4 border-b border-white/5 bg-[#050510]">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="github" class="w-5 h-5 text-white"></i>
+                    <h3 id="modal-title" class="font-display text-white text-lg uppercase tracking-tight truncate max-w-[200px] md:max-w-md">Repository</h3>
                 </div>
-                <button onclick="closeModal()" class="p-3 bg-white/10 hover:bg-white hover:text-black rounded-full transition-all duration-200 border border-white/20">
-                    <i data-lucide="x" class="w-6 h-6"></i>
+                <button onclick="closeModal()" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5 text-gray-400 hover:text-white"></i>
                 </button>
             </div>
-
-            <!-- Modal Body -->
             <div class="flex flex-1 overflow-hidden">
-                <!-- Sidebar -->
-                <div class="w-1/3 md:w-80 bg-[#0a0a12] border-r border-white/10 overflow-y-auto p-4" id="file-tree">
-                    <!-- File tree -->
-                </div>
-                
-                <!-- Code Area -->
+                <div class="w-1/3 md:w-64 bg-[#0a0a12] border-r border-white/5 overflow-y-auto p-2" id="file-tree"></div>
                 <div class="flex-1 bg-[#050508] overflow-y-auto relative custom-scrollbar" id="code-container">
-                    <div id="code-viewer" class="p-8 min-h-full">
-                        <div class="h-full flex flex-col items-center justify-center text-gray-500">
-                            <i data-lucide="mouse-pointer" class="w-16 h-16 opacity-30 mb-4"></i>
-                            <p class="font-display uppercase tracking-widest text-sm font-bold">Selecciona un archivo</p>
+                    <div id="code-viewer" class="p-6 min-h-full">
+                        <div class="h-full flex flex-col items-center justify-center text-gray-600">
+                            <i data-lucide="mouse-pointer" class="w-10 h-10 opacity-30 mb-2"></i>
+                            <p class="font-display uppercase tracking-widest text-[10px]">Selecciona archivo</p>
                         </div>
                     </div>
                 </div>
@@ -294,13 +253,44 @@
     <script>
         const USERNAME = 'Gmdrax';
         let allRepos = [];
+        let filteredRepos = [];
         let currentLangFilter = 'all';
+        
+        // Paginación
+        const ITEMS_PER_PAGE = 9;
+        let visibleCount = ITEMS_PER_PAGE;
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('year').textContent = new Date().getFullYear();
             loadProfile();
+            
+            // Event Listener para Load More
+            document.getElementById('load-more-btn').addEventListener('click', () => {
+                visibleCount += ITEMS_PER_PAGE;
+                renderRepos(filteredRepos, true); // true = append mode (optimización)
+            });
+
+            // Debounce Search
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', debounce((e) => {
+                handleSearch(e.target.value);
+            }, 300));
+
             lucide.createIcons();
         });
+
+        // Utilidad Debounce
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
 
         async function loadProfile() {
             try {
@@ -312,23 +302,25 @@
                 if (!userRes.ok) throw new Error('Usuario no encontrado');
 
                 const user = await userRes.json();
-                const repos = await reposRes.json();
-                allRepos = repos;
+                allRepos = await reposRes.json();
+                filteredRepos = allRepos; // Inicialmente todos
 
                 renderProfile(user);
-                calculateStats(repos);
-                setupFilters(repos);
-                renderRepos(repos);
+                calculateStats(allRepos);
+                setupFilters(allRepos);
+                
+                // Renderizado inicial
+                renderRepos(filteredRepos);
 
                 document.getElementById('loading').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('main-content').style.opacity = '1';
-                }, 500);
+                }, 300);
 
             } catch (error) {
                 console.error(error);
-                alert('Error cargando GitHub.');
+                alert('Error: Verifica el usuario o límites de API.');
             }
         }
 
@@ -344,7 +336,6 @@
         function calculateStats(repos) {
             const totalStars = repos.reduce((acc, repo) => acc + repo.stargazers_count, 0);
             const totalForks = repos.reduce((acc, repo) => acc + repo.forks_count, 0);
-            
             const langs = {};
             repos.forEach(r => { if(r.language) langs[r.language] = (langs[r.language] || 0) + 1; });
             const topLang = Object.keys(langs).reduce((a, b) => langs[a] > langs[b] ? a : b, 'N/A');
@@ -361,65 +352,69 @@
 
             languages.forEach(lang => {
                 const btn = document.createElement('button');
-                btn.className = 'filter-btn bg-black/60 hover:bg-white/20 text-gray-300 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all border border-white/20';
+                btn.className = 'filter-btn bg-black/60 hover:bg-white/20 text-gray-300 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border border-white/20';
                 btn.textContent = lang;
                 btn.onclick = () => filterByLang(lang, btn);
                 container.appendChild(btn);
             });
+        }
 
-            document.getElementById('search-input').addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-                const filtered = allRepos.filter(repo => {
-                    const matchesSearch = repo.name.toLowerCase().includes(term) || (repo.description || '').toLowerCase().includes(term);
-                    const matchesLang = currentLangFilter === 'all' || repo.language === currentLangFilter;
-                    return matchesSearch && matchesLang;
-                });
-                renderRepos(filtered);
+        function handleSearch(term) {
+            term = term.toLowerCase();
+            filteredRepos = allRepos.filter(repo => {
+                const matchesSearch = repo.name.toLowerCase().includes(term) || (repo.description || '').toLowerCase().includes(term);
+                const matchesLang = currentLangFilter === 'all' || repo.language === currentLangFilter;
+                return matchesSearch && matchesLang;
             });
+            visibleCount = ITEMS_PER_PAGE; // Reset paginación al buscar
+            renderRepos(filteredRepos);
         }
 
         function filterByLang(lang, btnElement) {
             currentLangFilter = currentLangFilter === lang ? 'all' : lang;
             
             document.querySelectorAll('.filter-btn').forEach(b => {
-                b.classList.remove('bg-white', 'text-black', 'scale-105', 'border-white');
-                b.classList.add('bg-black/60', 'text-gray-300', 'border-white/20');
+                b.className = 'filter-btn bg-black/60 hover:bg-white/20 text-gray-300 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border border-white/20';
             });
 
             if (currentLangFilter !== 'all') {
-                btnElement.classList.remove('bg-black/60', 'text-gray-300', 'border-white/20');
-                btnElement.classList.add('bg-white', 'text-black', 'scale-105', 'border-white');
+                btnElement.className = 'filter-btn bg-white text-black px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap border border-white scale-105';
             } else {
-                document.querySelector('[data-filter="all"]').classList.add('bg-white', 'text-black', 'scale-105', 'border-white');
-                document.querySelector('[data-filter="all"]').classList.remove('bg-black/60', 'text-gray-300', 'border-white/20');
+                document.querySelector('[data-filter="all"]').className = 'filter-btn bg-white text-black px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap border border-white';
             }
 
-            const searchVal = document.getElementById('search-input').value.toLowerCase();
-            const filtered = allRepos.filter(repo => {
-                const matchesSearch = repo.name.toLowerCase().includes(searchVal) || (repo.description || '').toLowerCase().includes(searchVal);
-                const matchesLang = currentLangFilter === 'all' || repo.language === currentLangFilter;
-                return matchesSearch && matchesLang;
-            });
-            renderRepos(filtered);
+            // Re-aplicar búsqueda actual si existe
+            const searchTerm = document.getElementById('search-input').value;
+            handleSearch(searchTerm);
         }
 
-        function renderRepos(repos) {
+        function renderRepos(repos, append = false) {
             const grid = document.getElementById('repos-grid');
-            grid.innerHTML = '';
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            const showingCountLabel = document.getElementById('showing-count');
+
+            if (!append) {
+                grid.innerHTML = ''; // Limpiar solo si no es append
+            }
 
             if (repos.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500 font-bold uppercase tracking-widest">No se encontraron resultados</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500 font-bold uppercase tracking-widest text-xs">Sin resultados</div>`;
+                loadMoreBtn.classList.add('hidden');
+                showingCountLabel.textContent = '';
                 return;
             }
 
-            repos.forEach((repo, index) => {
-                const card = document.createElement('div');
-                card.className = 'glass-card p-8 flex flex-col h-full cursor-pointer group hover:bg-[#0a0a15] transition-all duration-300';
-                card.style.animationDelay = `${index * 50}ms`;
-                card.onclick = (e) => {
-                    if (!e.target.closest('a')) openRepoViewer(repo);
-                };
+            // Cortar array para paginación
+            const startIndex = append ? visibleCount - ITEMS_PER_PAGE : 0;
+            const itemsToShow = repos.slice(startIndex, visibleCount);
 
+            // Si es modo append y no hay nada nuevo que mostrar, salir
+            if(append && itemsToShow.length === 0) return;
+
+            itemsToShow.forEach((repo) => {
+                const card = document.createElement('div');
+                card.className = 'glass-card p-5 flex flex-col h-full cursor-pointer group hover:bg-[#0a0a15]';
+                
                 let langColor = '#ffffff';
                 if(repo.language === 'JavaScript') langColor = '#facc15';
                 if(repo.language === 'TypeScript') langColor = '#3b82f6';
@@ -427,32 +422,43 @@
                 if(repo.language === 'HTML') langColor = '#f97316';
 
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="bg-white/5 p-3 rounded-xl border border-white/10 group-hover:bg-primary group-hover:text-black group-hover:border-primary transition-all duration-300 shadow-lg">
-                            <i data-lucide="folder" class="w-6 h-6"></i>
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="bg-white/5 p-2 rounded-lg border border-white/10 group-hover:bg-primary group-hover:text-black transition-colors">
+                            <i data-lucide="folder" class="w-5 h-5"></i>
                         </div>
-                        <a href="${repo.html_url}" target="_blank" class="text-gray-400 hover:text-white p-2 hover:bg-white/10 rounded-full transition-colors">
-                            <i data-lucide="external-link" class="w-5 h-5"></i>
+                        <a href="${repo.html_url}" target="_blank" class="text-gray-500 hover:text-white p-1 hover:bg-white/10 rounded transition-colors" onclick="event.stopPropagation()">
+                            <i data-lucide="external-link" class="w-4 h-4"></i>
                         </a>
                     </div>
                     
-                    <h3 class="font-display text-2xl mb-3 text-white group-hover:text-primary transition-colors uppercase leading-none break-all tracking-wide">${repo.name}</h3>
+                    <h3 class="font-display text-lg mb-2 text-white group-hover:text-primary transition-colors uppercase leading-tight break-all">${repo.name}</h3>
+                    <p class="text-xs text-gray-400 mb-6 flex-1 line-clamp-2 leading-relaxed">${repo.description || 'Sin descripción.'}</p>
                     
-                    <p class="text-sm text-gray-300 mb-8 flex-1 line-clamp-3 font-medium leading-relaxed group-hover:text-white transition-colors">${repo.description || 'Sin descripción disponible.'}</p>
-                    
-                    <div class="flex items-center justify-between text-xs font-mono uppercase font-bold tracking-wider text-gray-400 pt-4 border-t border-white/10 w-full group-hover:border-white/20">
+                    <div class="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-gray-500 pt-3 border-t border-white/5 w-full">
                         <div class="flex items-center gap-2">
-                            ${repo.language ? `<span class="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_${langColor}]" style="background-color: ${langColor}"></span> <span class="text-gray-200">${repo.language}</span>` : ''}
+                            ${repo.language ? `<span class="w-2 h-2 rounded-full" style="background-color: ${langColor}"></span> ${repo.language}` : ''}
                         </div>
-                        <div class="flex gap-4 text-white">
-                            <span class="flex items-center gap-1"><i data-lucide="star" class="w-3.5 h-3.5 text-yellow-400"></i> ${repo.stargazers_count}</span>
-                            <span class="flex items-center gap-1"><i data-lucide="git-fork" class="w-3.5 h-3.5 text-blue-400"></i> ${repo.forks_count}</span>
+                        <div class="flex gap-3 text-gray-400">
+                            <span class="flex items-center gap-1"><i data-lucide="star" class="w-3 h-3"></i> ${repo.stargazers_count}</span>
+                            <span class="flex items-center gap-1"><i data-lucide="git-fork" class="w-3 h-3"></i> ${repo.forks_count}</span>
                         </div>
                     </div>
                 `;
+                card.onclick = () => openRepoViewer(repo);
                 grid.appendChild(card);
             });
+
+            // Actualizar iconos solo en nuevos elementos (Lucide lo maneja al escanear el DOM)
             lucide.createIcons();
+
+            // Lógica botón "Cargar Más"
+            if (visibleCount < repos.length) {
+                loadMoreBtn.classList.remove('hidden');
+            } else {
+                loadMoreBtn.classList.add('hidden');
+            }
+
+            showingCountLabel.textContent = `Mostrando ${Math.min(visibleCount, repos.length)} de ${repos.length}`;
         }
 
         async function openRepoViewer(repo) {
@@ -461,8 +467,8 @@
             document.getElementById('modal-title').textContent = repo.name;
             
             const fileTree = document.getElementById('file-tree');
-            fileTree.innerHTML = '<div class="text-center p-4 text-primary animate-pulse font-mono text-xs uppercase font-bold">Cargando...</div>';
-            document.getElementById('code-viewer').innerHTML = '<div class="h-full flex flex-col items-center justify-center text-gray-500"><i data-lucide="mouse-pointer" class="w-12 h-12 opacity-50 mb-2"></i><p class="font-bold uppercase tracking-widest text-xs">Selecciona archivo</p></div>';
+            fileTree.innerHTML = '<div class="text-center p-4 text-primary animate-pulse font-mono text-[10px] uppercase font-bold">Cargando...</div>';
+            document.getElementById('code-viewer').innerHTML = '<div class="h-full flex flex-col items-center justify-center text-gray-500"><i data-lucide="mouse-pointer" class="w-10 h-10 opacity-30 mb-2"></i><p class="font-bold uppercase tracking-widest text-[10px]">Selecciona archivo</p></div>';
             lucide.createIcons();
 
             try {
@@ -470,11 +476,15 @@
                 const data = await response.json();
                 
                 if (data.tree) {
-                    const files = data.tree.filter(item => item.type === 'blob');
-                    renderFileTree(files, repo.name, repo.default_branch);
+                    // Filtrar y ordenar: Carpetas primero, luego archivos
+                    const sorted = data.tree
+                        .filter(item => item.type === 'blob')
+                        .sort((a, b) => a.path.localeCompare(b.path));
+                        
+                    renderFileTree(sorted, repo.name, repo.default_branch);
                 }
             } catch (e) {
-                fileTree.innerHTML = '<div class="text-red-400 p-4 text-center text-xs uppercase font-bold border border-red-900/50 rounded-lg bg-red-900/20">Error de acceso</div>';
+                fileTree.innerHTML = '<div class="text-red-400 p-2 text-center text-[10px] uppercase font-bold">Error de acceso</div>';
             }
         }
 
@@ -482,32 +492,36 @@
             const container = document.getElementById('file-tree');
             container.innerHTML = '';
             
+            // Renderizar con DocumentFragment para performance
+            const fragment = document.createDocumentFragment();
+
             files.forEach(file => {
                 const div = document.createElement('div');
-                div.className = 'flex items-center gap-3 p-3 hover:bg-white/10 rounded-lg cursor-pointer text-xs text-gray-400 hover:text-white transition-all truncate font-mono mb-1 border border-transparent hover:border-white/10 font-medium';
+                div.className = 'flex items-center gap-2 p-2 hover:bg-white/5 rounded cursor-pointer text-[10px] text-gray-400 hover:text-white transition-colors truncate font-mono mb-0.5';
                 
                 const ext = file.path.split('.').pop();
                 let icon = 'file';
-                let iconColor = 'text-gray-500';
                 
-                if(['js','ts','jsx'].includes(ext)) { icon = 'file-code'; iconColor = 'text-yellow-400'; }
-                if(['css','html'].includes(ext)) { icon = 'layout'; iconColor = 'text-blue-400'; }
-                if(['png','jpg','svg'].includes(ext)) { icon = 'image'; iconColor = 'text-pink-400'; }
-                if(['md','txt'].includes(ext)) { icon = 'file-text'; iconColor = 'text-white'; }
+                if(['js','ts','jsx'].includes(ext)) icon = 'file-code';
+                if(['css','html'].includes(ext)) icon = 'layout';
+                if(['png','jpg','svg'].includes(ext)) icon = 'image';
+                if(['md','txt'].includes(ext)) icon = 'file-text';
 
-                div.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 min-w-[16px] ${iconColor}"></i> ${file.path}`;
+                div.innerHTML = `<i data-lucide="${icon}" class="w-3 h-3 min-w-[12px]"></i> ${file.path}`;
                 div.onclick = () => loadFileContent(repoName, branch, file.path, div);
-                container.appendChild(div);
+                fragment.appendChild(div);
             });
+            container.appendChild(fragment);
             lucide.createIcons();
         }
 
         async function loadFileContent(repoName, branch, path, element) {
-            document.querySelectorAll('#file-tree div').forEach(d => d.classList.remove('bg-white/10', 'border-white/20', 'text-white', 'border-primary/50'));
-            element.classList.add('bg-white/10', 'border-primary/50', 'text-white');
+            // UI Update rápida
+            document.querySelectorAll('#file-tree div').forEach(d => d.classList.remove('text-primary', 'bg-white/10'));
+            element.classList.add('text-primary', 'bg-white/10');
 
             const viewer = document.getElementById('code-viewer');
-            viewer.innerHTML = '<div class="text-center p-10"><div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div></div>';
+            viewer.innerHTML = '<div class="text-center p-10"><div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div></div>';
 
             try {
                 const res = await fetch(`https://api.github.com/repos/${USERNAME}/${repoName}/contents/${path}?ref=${branch}`);
@@ -519,18 +533,18 @@
 
                     if (isImage) {
                         viewer.innerHTML = `
-                            <div class="flex items-center justify-center h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0ibm9uZSI+PHBhdGggZmlsbD0iIzExMSIgZD0iTTAgMGgyMHYyMEgwVjB6Ii8+PHBhdGggZmlsbD0iIzIyMiIgZD0iTTAgMGgxMHYxMEgwVjB6bTEwIDEwaDEwdjEwSDEwVjEweiIvPjwvc3ZnPg==')]">
-                                <img src="${data.download_url}" class="max-w-full max-h-full shadow-2xl rounded-lg border-2 border-white/20">
+                            <div class="flex items-center justify-center h-full bg-[#0a0a12] p-4 rounded-lg">
+                                <img src="${data.download_url}" class="max-w-full max-h-full rounded shadow-lg border border-white/10">
                             </div>
                         `;
                     } else {
-                        viewer.innerHTML = `<pre class="font-mono text-xs text-gray-200 whitespace-pre-wrap break-words leading-relaxed selection:bg-primary selection:text-black">${escapeHtml(content)}</pre>`;
+                        viewer.innerHTML = `<pre class="font-mono text-[10px] md:text-xs text-gray-200 whitespace-pre-wrap break-words leading-relaxed selection:bg-primary selection:text-black">${escapeHtml(content)}</pre>`;
                     }
                 } else {
-                    viewer.innerHTML = '<p class="text-center p-10 text-gray-500 font-mono text-xs border border-white/10 rounded-lg">Archivo binario o demasiado grande.</p>';
+                    viewer.innerHTML = '<p class="text-center p-10 text-gray-500 font-mono text-xs">Archivo binario o grande.</p>';
                 }
             } catch (e) {
-                viewer.innerHTML = '<p class="text-center p-10 text-red-400 font-mono text-xs">Error al leer contenido.</p>';
+                viewer.innerHTML = '<p class="text-center p-10 text-red-400 font-mono text-xs">Error de lectura.</p>';
             }
         }
 
