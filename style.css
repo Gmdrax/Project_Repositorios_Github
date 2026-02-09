@@ -1,0 +1,71 @@
+  /* 1. Estilos Base */
+  body {
+    background-color: #050510;
+    background-image: 
+        linear-gradient(rgba(5, 5, 16, 0.92), rgba(5, 5, 16, 0.98)),
+        url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop');
+    background-attachment: fixed;
+    background-size: cover;
+    color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 2. Componentes Glassmorphism (Cristal) */
+.glass-panel {
+    background: rgba(15, 15, 25, 0.9); /* Más opaco para rendimiento */
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border-radius: 1.5rem;
+}
+
+/* 3. Tarjetas de Repositorios */
+.repo-card {
+    background: rgba(20, 20, 35, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    transition: all 0.2s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.repo-card:hover {
+    border-color: #00f2ea;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px -10px rgba(0, 242, 234, 0.15);
+}
+
+/* 4. Tipografía y Utilidades */
+h1, h2, h3 { 
+    text-transform: uppercase; 
+    letter-spacing: -0.02em; 
+}
+
+.input-search {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    transition: border-color 0.3s;
+}
+.input-search:focus {
+    border-color: #00f2ea;
+    outline: none;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #050510; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #00f2ea; }
+
+/* Botón de carga */
+.btn-load {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s;
+}
+.btn-load:hover {
+    background: rgba(0, 242, 234, 0.1);
+    border-color: #00f2ea;
+    color: #00f2ea;
+}
