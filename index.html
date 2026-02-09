@@ -44,7 +44,6 @@
     <style>
         body {
             background-color: #050510;
-            /* Fondo optimizado: imagen estática oscura */
             background-image: linear-gradient(rgba(5, 5, 16, 0.9), rgba(5, 5, 16, 0.95)), url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop');
             background-attachment: fixed;
             background-size: cover;
@@ -52,7 +51,6 @@
             font-smoothing: antialiased;
         }
         
-        /* Panel Principal: Blur solo en elementos grandes */
         .glass-panel {
             background: rgba(15, 15, 25, 0.85);
             backdrop-filter: blur(12px); 
@@ -62,9 +60,8 @@
             border-radius: 1.5rem;
         }
 
-        /* Tarjetas: Ligeras para rendimiento (sin backdrop-filter pesado) */
         .glass-card {
-            background: rgba(20, 20, 35, 0.95); /* Casi opaco para mejor rendimiento */
+            background: rgba(20, 20, 35, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 1rem;
             transition: transform 0.2s ease, border-color 0.2s ease;
@@ -100,7 +97,6 @@
             background: black;
         }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #050510; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
@@ -421,14 +417,25 @@
                 if(repo.language === 'Python') langColor = '#22c55e';
                 if(repo.language === 'HTML') langColor = '#f97316';
 
+                // Detectar si hay URL de despliegue
+                const hasDemo = repo.homepage && repo.homepage.startsWith('http');
+
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-4">
                         <div class="bg-white/5 p-2 rounded-lg border border-white/10 group-hover:bg-primary group-hover:text-black transition-colors">
                             <i data-lucide="folder" class="w-5 h-5"></i>
                         </div>
-                        <a href="${repo.html_url}" target="_blank" class="text-gray-500 hover:text-white p-1 hover:bg-white/10 rounded transition-colors" onclick="event.stopPropagation()">
-                            <i data-lucide="external-link" class="w-4 h-4"></i>
-                        </a>
+                        
+                        <div class="flex gap-2">
+                            ${hasDemo ? `
+                            <a href="${repo.homepage}" target="_blank" class="text-primary hover:text-white p-1.5 hover:bg-primary/20 rounded-lg transition-colors border border-transparent hover:border-primary/50" title="Ver Web en Vivo" onclick="event.stopPropagation()">
+                                <i data-lucide="globe" class="w-4 h-4"></i>
+                            </a>
+                            ` : ''}
+                            <a href="${repo.html_url}" target="_blank" class="text-gray-500 hover:text-white p-1.5 hover:bg-white/10 rounded-lg transition-colors border border-transparent hover:border-white/20" title="Ver Código Fuente" onclick="event.stopPropagation()">
+                                <i data-lucide="github" class="w-4 h-4"></i>
+                            </a>
+                        </div>
                     </div>
                     
                     <h3 class="font-display text-lg mb-2 text-white group-hover:text-primary transition-colors uppercase leading-tight break-all">${repo.name}</h3>
