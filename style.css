@@ -60,3 +60,68 @@ body {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+/* Ocultar marcador por defecto de details/summary */
+details > summary {
+    list-style: none;
+}
+details > summary::-webkit-details-marker {
+    display: none;
+}
+
+/* --- ESTILOS MARKDOWN (README) --- */
+.markdown-body {
+    padding: 1.5rem;
+    color: #c9d1d9;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+}
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+    border-bottom: 1px solid #30363d;
+    padding-bottom: 0.3em;
+    margin-top: 1.5em;
+    margin-bottom: 1em;
+    color: #ffffff;
+    font-weight: 600;
+}
+.markdown-body h1 { font-size: 1.8em; }
+.markdown-body h2 { font-size: 1.4em; }
+.markdown-body a { color: #58a6ff; text-decoration: none; }
+.markdown-body a:hover { text-decoration: underline; }
+.markdown-body code {
+    background-color: rgba(110, 118, 129, 0.4);
+    padding: 0.2em 0.4em;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 85%;
+}
+.markdown-body pre {
+    background-color: #161b22;
+    padding: 16px;
+    overflow: auto;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+.markdown-body pre code {
+    background-color: transparent;
+    padding: 0;
+}
+.markdown-body img {
+    max-width: 100%;
+    border-radius: 6px;
+    background-color: transparent;
+}
+.markdown-body blockquote {
+    border-left: 0.25em solid #30363d;
+    color: #8b949e;
+    padding: 0 1em;
+    margin: 0;
+}
+
+/* --- ESTILOS BADGES --- */
+.tech-badge {
+    transition: transform 0.2s;
+}
+.tech-badge:hover {
+    transform: translateY(-2px);
+}
