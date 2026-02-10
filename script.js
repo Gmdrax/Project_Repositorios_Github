@@ -84,14 +84,33 @@ function getExpiredCache() {
     return null;
 }
 
-// --- LÓGICA PRINCIPAL ---
+// --- LÓGICA PRINCIPAL BLINDADA ---
 async function initApp() {
+    try {
+        // 1. ESTRATEGIA "ZERO-API" (Prioridad Máxima)
+        // Intentamos cargar un archivo local generado previamente.
+        // Si existe, la web carga instantánea y NO consume cuota de GitHub.
+        const staticResponse = await fetch('database.json');
+        
+        if (staticResponse.ok) {
+            const data = await staticResponse.json();
+            console.log('🚀 Modo Estático Activo: Carga instantánea (0 consumo API)');
+            processData(data.user, data.repos);
+            hideLoading();
+            return; // Terminamos aquí. La API de GitHub ni se entera.
+        }
+    } catch (e) {
+        console.warn('Modo Estático no disponible, iniciando modo dinámico...');
+    }
+
+    // 2. MODO DINÁMICO (Fallback / Respaldo)
+    // Solo si no hay archivo local, usamos la lógica original (Caché + API)
     let user, repos;
     const cached = getCachedData();
 
     try {
         if (cached) {
-            console.log('Cargando desde caché local...');
+            console.log('Cargando desde caché navegador...');
             user = cached.user;
             repos = cached.repos;
         } else {
@@ -101,38 +120,27 @@ async function initApp() {
                 fetch(`https://api.github.com/users/${USERNAME}/repos?per_page=100&sort=updated`)
             ]);
 
-            // Manejo específico de Límite de API
-            if (userRes.status === 403 || reposRes.status === 403) {
-                throw new Error('API_LIMIT');
-            }
+            if (userRes.status === 403 || reposRes.status === 403) throw new Error('API_LIMIT');
             if (!userRes.ok) throw new Error('Usuario no encontrado');
 
             user = await userRes.json();
             repos = await reposRes.json();
-            
-            // Guardar para la próxima
             saveToCache(user, repos);
         }
-        
-        // Renderizado Exitoso
         processData(user, repos);
         hideLoading();
 
     } catch (error) {
         console.error(error);
-        
-        // Si falla la API (Límite o Red), intentar cargar caché antigua
         const expiredData = getExpiredCache();
-        
         if (expiredData) {
-            showToast(); // Avisar al usuario
+            showToast();
             processData(expiredData.user, expiredData.repos);
             hideLoading();
         } else {
-            // Fallo total (Sin internet y sin caché)
             showError(error.message === 'API_LIMIT' 
-                ? 'Límite de API de GitHub excedido. Intenta más tarde.' 
-                : 'Error de conexión. Revisa tu internet.');
+                ? 'Límite de API excedido. Sube un archivo database.json para solucionarlo permanentemente.' 
+                : 'Error de conexión.');
         }
     }
 }
