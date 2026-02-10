@@ -259,13 +259,28 @@ function renderRepos(repos, append = false) {
            </div>`
         : '<div class="h-6 mb-4"></div>'; // Espaciador si no hay topics
 
-        card.innerHTML = `
+const editorUrl = repo.html_url.replace('github.com', 'github.dev');
+
+// 2. Reemplaza todo el card.innerHTML con esto:
+card.innerHTML = `
     <div class="flex justify-between items-start mb-4">
         <div class="bg-white/5 p-2 rounded-lg border border-white/10 group-hover:bg-primary group-hover:text-black transition-colors">
             <i data-lucide="folder" class="w-5 h-5"></i>
         </div>
         
         <div class="flex gap-2">
+            <a href="${editorUrl}" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               onclick="event.stopPropagation()" 
+               class="group/edit p-1.5 bg-blue-500/10 hover:bg-blue-500 rounded-md text-blue-400 hover:text-white border border-blue-500/50 transition-all z-10 flex items-center gap-1" 
+               title="Editar ahora (VS Code Web)">
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                <span class="max-w-0 overflow-hidden group-hover/edit:max-w-xs transition-all duration-300 text-[9px] font-bold uppercase whitespace-nowrap">
+                    Editar
+                </span>
+            </a>
+
             <button 
                 onclick="event.stopPropagation(); copyCloneCommand('${repo.clone_url}', this)" 
                 class="p-1.5 bg-white/5 hover:bg-white/20 rounded-md text-gray-400 hover:text-primary transition-colors z-10" 
