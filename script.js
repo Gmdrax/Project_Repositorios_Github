@@ -186,6 +186,22 @@ function renderProfile(user) {
     document.getElementById('followers').textContent = user.followers;
     document.getElementById('following').textContent = user.following;
     document.getElementById('github-link').href = user.html_url;
+    let clicks = 0;
+    const avatar = document.getElementById('avatar');
+    
+    avatar.style.cursor = 'pointer'; // Para saber que es clicable
+    avatar.onclick = () => {
+        clicks++;
+        if (clicks === 5) {
+            // Activamos el modo admin
+            localStorage.setItem('GMDRAX_ADMIN', 'true');
+            alert('🔓 MODO DUEÑO ACTIVADO\nAhora puedes ver los botones de edición.');
+            
+            // Recargamos para mostrar los botones
+            location.reload(); 
+        }
+    };
+
 }
 
 function calculateStats(repos) {
