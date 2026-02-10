@@ -226,34 +226,7 @@ function renderRepos(repos, append = false) {
     const loadMoreBtn = document.getElementById('load-more-btn');
     const showingCountLabel = document.getElementById('showing-count');
 
-    card.innerHTML = `
-    <div class="flex justify-between items-start mb-4">
-        <div class="bg-white/5 p-2 rounded-lg ...">
-            <i data-lucide="folder" class="w-5 h-5"></i>
-        </div>
-        
-        <div class="flex gap-2">
-            
-            ${isAdmin ? `
-            <a href="${editorUrl}" 
-               target="_blank" 
-               rel="noopener noreferrer" 
-               onclick="event.stopPropagation()" 
-               class="group/edit p-1.5 bg-blue-500/10 hover:bg-blue-500 rounded-md text-blue-400 hover:text-white border border-blue-500/50 transition-all z-10 flex items-center gap-1" 
-               title="Editar ahora (Solo Tú)">
-                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                <span class="max-w-0 overflow-hidden group-hover/edit:max-w-xs transition-all duration-300 text-[9px] font-bold uppercase whitespace-nowrap">
-                    Editar
-                </span>
-            </a>` : ''}
-
-            <button onclick="event.stopPropagation(); copyCloneCommand('${repo.clone_url}', this)" ... >
-                </button>
-            
-            </div>
-    </div>
-    `;
-
+    
     if (!append) grid.innerHTML = '';
 
     if (repos.length === 0) {
@@ -301,6 +274,14 @@ function renderRepos(repos, append = false) {
             'node': 'node.js-6DA55F?style=flat&logo=node.js&logoColor=white',
             'nextjs': 'Next-black?style=flat&logo=next.js&logoColor=white'
         };
+
+        const editorUrl = repo.html_url.replace('github.com', 'github.dev');
+        let hasWeb = false;
+        let webUrl = '#';
+        if (repo.homepage && repo.homepage.trim() !== "") {
+            hasWeb = true;
+            webUrl = repo.homepage.startsWith('http') ? repo.homepage : 'https://' + repo.homepage;
+        }
         
         const url = logos[topic.toLowerCase()] || `${topic}-blue?style=flat&logo=github`;
         return `<img src="https://img.shields.io/badge/${url}" alt="${topic}" class="h-5 tech-badge rounded-sm">`;
@@ -316,57 +297,56 @@ const editorUrl = repo.html_url.replace('github.com', 'github.dev');
 
 // 2. Reemplaza todo el card.innerHTML con esto:
 card.innerHTML = `
-    <div class="flex justify-between items-start mb-4">
-        <div class="bg-white/5 p-2 rounded-lg border border-white/10 group-hover:bg-primary group-hover:text-black transition-colors">
-            <i data-lucide="folder" class="w-5 h-5"></i>
-        </div>
-        
-        <div class="flex gap-2">
-            <a href="${editorUrl}" 
-               target="_blank" 
-               rel="noopener noreferrer" 
-               onclick="event.stopPropagation()" 
-               class="group/edit p-1.5 bg-blue-500/10 hover:bg-blue-500 rounded-md text-blue-400 hover:text-white border border-blue-500/50 transition-all z-10 flex items-center gap-1" 
-               title="Editar ahora (VS Code Web)">
-                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                <span class="max-w-0 overflow-hidden group-hover/edit:max-w-xs transition-all duration-300 text-[9px] font-bold uppercase whitespace-nowrap">
-                    Editar
-                </span>
-            </a>
+            <div class="flex justify-between items-start mb-4">
+                <div class="bg-white/5 p-2 rounded-lg border border-white/10 group-hover:bg-primary group-hover:text-black transition-colors">
+                    <i data-lucide="folder" class="w-5 h-5"></i>
+                </div>
+                
+                <div class="flex gap-2">
+                    ${isAdmin ? `
+                    <a href="${editorUrl}" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       onclick="event.stopPropagation()" 
+                       class="group/edit p-1.5 bg-blue-500/10 hover:bg-blue-500 rounded-md text-blue-400 hover:text-white border border-blue-500/50 transition-all z-10 flex items-center gap-1" 
+                       title="Editar ahora (Solo Tú)">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                    </a>` : ''}
 
-            <button 
-                onclick="event.stopPropagation(); copyCloneCommand('${repo.clone_url}', this)" 
-                class="p-1.5 bg-white/5 hover:bg-white/20 rounded-md text-gray-400 hover:text-primary transition-colors z-10" 
-                title="Copiar 'git clone'">
-                <i data-lucide="clipboard-copy" class="w-4 h-4"></i>
-            </button>
+                    <button 
+                        onclick="event.stopPropagation(); copyCloneCommand('${repo.clone_url}', this)" 
+                        class="p-1.5 bg-white/5 hover:bg-white/20 rounded-md text-gray-400 hover:text-primary transition-colors z-10" 
+                        title="Copiar 'git clone'">
+                        <i data-lucide="clipboard-copy" class="w-4 h-4"></i>
+                    </button>
 
-            ${hasWeb ? `
-            <a href="${webUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="flex items-center gap-1 px-2 py-1 bg-primary/10 border border-primary/50 text-primary rounded-md text-[10px] font-bold uppercase hover:bg-primary hover:text-black transition-all z-10" title="Ver Proyecto Online">
-                <i data-lucide="globe" class="w-3 h-3"></i> WEB
-            </a>` : ''}
+                    ${hasWeb ? `
+                    <a href="${webUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="flex items-center gap-1 px-2 py-1 bg-primary/10 border border-primary/50 text-primary rounded-md text-[10px] font-bold uppercase hover:bg-primary hover:text-black transition-all z-10" title="Ver Proyecto Online">
+                        <i data-lucide="globe" class="w-3 h-3"></i> WEB
+                    </a>` : ''}
+                    
+                    <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="p-1.5 bg-white/5 hover:bg-white/20 rounded-md text-gray-400 hover:text-white transition-colors z-10" title="Ver en GitHub">
+                        <i data-lucide="external-link" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
             
-            <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="p-1.5 bg-white/5 hover:bg-white/20 rounded-md text-gray-400 hover:text-white transition-colors z-10" title="Ver en GitHub">
-                <i data-lucide="external-link" class="w-4 h-4"></i>
-            </a>
-        </div>
-    </div>
-    
-    <h3 class="font-display text-lg mb-2 text-white group-hover:text-primary transition-colors uppercase leading-tight break-all">${repo.name}</h3>
-    <p class="text-xs text-gray-400 mb-6 flex-1 truncate-2-lines leading-relaxed">${repo.description || 'Sin descripción disponible.'}</p>
-    
-    <div class="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-gray-500 pt-3 border-t border-white/5 w-full">
-        <div class="flex items-center gap-2">
-            ${repo.language ? `<span class="w-2 h-2 rounded-full" style="background-color: ${langColor}; box-shadow: 0 0 5px ${langColor}"></span> ${repo.language}` : ''}
-        </div>
-        <div class="flex gap-3 text-gray-400">
-            <span class="flex items-center gap-1"><i data-lucide="star" class="w-3 h-3"></i> ${repo.stargazers_count}</span>
-            <span class="flex items-center gap-1"><i data-lucide="git-fork" class="w-3 h-3"></i> ${repo.forks_count}</span>
-        </div>
-    </div>
-`;
+            <h3 class="font-display text-lg mb-2 text-white group-hover:text-primary transition-colors uppercase leading-tight break-all">${repo.name}</h3>
+            <p class="text-xs text-gray-400 mb-6 flex-1 truncate-2-lines leading-relaxed">${repo.description || 'Sin descripción disponible.'}</p>
+            
+            <div class="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-gray-500 pt-3 border-t border-white/5 w-full">
+                <div class="flex items-center gap-2">
+                    ${repo.language ? `<span class="w-2 h-2 rounded-full" style="background-color: ${langColor}; box-shadow: 0 0 5px ${langColor}"></span> ${repo.language}` : ''}
+                </div>
+                <div class="flex gap-3 text-gray-400">
+                    <span class="flex items-center gap-1"><i data-lucide="star" class="w-3 h-3"></i> ${repo.stargazers_count}</span>
+                    <span class="flex items-center gap-1"><i data-lucide="git-fork" class="w-3 h-3"></i> ${repo.forks_count}</span>
+                </div>
+            </div>
+        `;
+        
         card.onclick = (e) => {
-            if(!e.target.closest('a')) openRepoViewer(repo);
+            if(!e.target.closest('a') && !e.target.closest('button')) openRepoViewer(repo);
         };
         fragment.appendChild(card);
     });
