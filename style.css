@@ -75,8 +75,15 @@ body {
   min-height: 100vh;
 }
 
+/* CORRECCIÓN DE SUPERPOSICIÓN:
+   Asegura que el contenido principal siempre esté por encima de los fondos. */
+main {
+  position: relative;
+  z-index: 10;
+}
+
 /* ============================================
-   FONDO LIQUID GLASS CON GRADIENTES ANIMADOS
+   FONDO LIQUID GLASS CON GRADIENTES ESTATICOS
    ============================================ */
 
 .bg-fixed-layer {
@@ -89,7 +96,9 @@ body {
     radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.25) 0%, transparent 55%),
     radial-gradient(circle at 30% 60%, rgba(236, 72, 153, 0.2) 0%, transparent 40%),
     linear-gradient(135deg, #1a0b2e 0%, #0f0a1f 50%, #1a0b2e 100%);
-  animation: liquidFlow 15s ease-in-out infinite;
+  
+  /* Animación desactivada */
+  /* animation: liquidFlow 15s ease-in-out infinite; */
 }
 
 @keyframes liquidFlow {
@@ -104,7 +113,7 @@ body {
   }
 }
 
-/* Partículas Flotantes */
+/* Partículas Flotantes (ESTÁTICAS) */
 body::before {
   content: "";
   position: fixed;
@@ -121,8 +130,10 @@ body::before {
   background-size: 200% 200%;
   z-index: -1;
   opacity: 0.6;
-  animation: particlesFloat 20s linear infinite;
   pointer-events: none;
+  
+  /* Animación desactivada */
+  /* animation: particlesFloat 20s linear infinite; */
 }
 
 @keyframes particlesFloat {
@@ -134,7 +145,7 @@ body::before {
   }
 }
 
-/* Glow Dinámico Superior */
+/* Glow Dinámico Superior (ESTÁTICO) */
 body::after {
   content: "";
   position: fixed;
@@ -153,7 +164,9 @@ body::after {
   opacity: 0.5;
   z-index: -1;
   pointer-events: none;
-  animation: glowPulse 8s ease-in-out infinite;
+
+  /* Animación desactivada */
+  /* animation: glowPulse 8s ease-in-out infinite; */
 }
 
 @keyframes glowPulse {
