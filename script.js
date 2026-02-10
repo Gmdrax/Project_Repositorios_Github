@@ -221,9 +221,38 @@ function calculateStats(repos) {
 
 // --- RENDERIZADO ---
 function renderRepos(repos, append = false) {
+    const isAdmin = localStorage.getItem('GMDRAX_ADMIN') === 'true';
     const grid = document.getElementById('repos-grid');
     const loadMoreBtn = document.getElementById('load-more-btn');
     const showingCountLabel = document.getElementById('showing-count');
+
+    card.innerHTML = `
+    <div class="flex justify-between items-start mb-4">
+        <div class="bg-white/5 p-2 rounded-lg ...">
+            <i data-lucide="folder" class="w-5 h-5"></i>
+        </div>
+        
+        <div class="flex gap-2">
+            
+            ${isAdmin ? `
+            <a href="${editorUrl}" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               onclick="event.stopPropagation()" 
+               class="group/edit p-1.5 bg-blue-500/10 hover:bg-blue-500 rounded-md text-blue-400 hover:text-white border border-blue-500/50 transition-all z-10 flex items-center gap-1" 
+               title="Editar ahora (Solo Tú)">
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                <span class="max-w-0 overflow-hidden group-hover/edit:max-w-xs transition-all duration-300 text-[9px] font-bold uppercase whitespace-nowrap">
+                    Editar
+                </span>
+            </a>` : ''}
+
+            <button onclick="event.stopPropagation(); copyCloneCommand('${repo.clone_url}', this)" ... >
+                </button>
+            
+            </div>
+    </div>
+    `;
 
     if (!append) grid.innerHTML = '';
 
