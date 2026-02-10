@@ -220,12 +220,12 @@ function calculateStats(repos) {
 }
 
 // --- RENDERIZADO ---
+// --- RENDERIZADO ---
 function renderRepos(repos, append = false) {
     const isAdmin = localStorage.getItem('GMDRAX_ADMIN') === 'true';
     const grid = document.getElementById('repos-grid');
     const loadMoreBtn = document.getElementById('load-more-btn');
     const showingCountLabel = document.getElementById('showing-count');
-
     
     if (!append) grid.innerHTML = '';
 
@@ -253,28 +253,7 @@ function renderRepos(repos, append = false) {
         };
         const langColor = langColors[repo.language] || '#ffffff';
         
-        let hasWeb = false;
-        let webUrl = '#';
-        
-        if (repo.homepage && repo.homepage.trim() !== "") {
-            hasWeb = true;
-            webUrl = repo.homepage.startsWith('http') ? repo.homepage : 'https://' + repo.homepage;
-        }
-        const generateBadge = (topic) => {
-        const logos = {
-            'react': 'react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB',
-            'vue': 'vue.js-%2335495e.svg?style=flat&logo=vuedotjs&logoColor=%234FC08D',
-            'angular': 'angular-%23DD0031.svg?style=flat&logo=angular&logoColor=white',
-            'javascript': 'javascript-%23323330.svg?style=flat&logo=javascript&logoColor=%23F7DF1E',
-            'typescript': 'typescript-%23007ACC.svg?style=flat&logo=typescript&logoColor=white',
-            'python': 'python-3670A0?style=flat&logo=python&logoColor=ffdd54',
-            'html': 'html5-%23E34F26.svg?style=flat&logo=html5&logoColor=white',
-            'css': 'css3-%231572B6.svg?style=flat&logo=css3&logoColor=white',
-            'tailwind': 'tailwindcss-%2338B2AC.svg?style=flat&logo=tailwind-css&logoColor=white',
-            'node': 'node.js-6DA55F?style=flat&logo=node.js&logoColor=white',
-            'nextjs': 'Next-black?style=flat&logo=next.js&logoColor=white'
-        };
-
+        // Configuración de URLs
         const editorUrl = repo.html_url.replace('github.com', 'github.dev');
         let hasWeb = false;
         let webUrl = '#';
@@ -282,21 +261,34 @@ function renderRepos(repos, append = false) {
             hasWeb = true;
             webUrl = repo.homepage.startsWith('http') ? repo.homepage : 'https://' + repo.homepage;
         }
-        
-        const url = logos[topic.toLowerCase()] || `${topic}-blue?style=flat&logo=github`;
-        return `<img src="https://img.shields.io/badge/${url}" alt="${topic}" class="h-5 tech-badge rounded-sm">`;
-    };
 
-    const badgesHtml = repo.topics && repo.topics.length > 0
-        ? `<div class="flex flex-wrap gap-1.5 mb-4 overflow-hidden h-6">
-            ${repo.topics.slice(0, 4).map(t => generateBadge(t)).join('')}
-           </div>`
-        : '<div class="h-6 mb-4"></div>'; // Espaciador si no hay topics
+        // Generador de Badges (Limpio)
+        const generateBadge = (topic) => {
+            const logos = {
+                'react': 'react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB',
+                'vue': 'vue.js-%2335495e.svg?style=flat&logo=vuedotjs&logoColor=%234FC08D',
+                'angular': 'angular-%23DD0031.svg?style=flat&logo=angular&logoColor=white',
+                'javascript': 'javascript-%23323330.svg?style=flat&logo=javascript&logoColor=%23F7DF1E',
+                'typescript': 'typescript-%23007ACC.svg?style=flat&logo=typescript&logoColor=white',
+                'python': 'python-3670A0?style=flat&logo=python&logoColor=ffdd54',
+                'html': 'html5-%23E34F26.svg?style=flat&logo=html5&logoColor=white',
+                'css': 'css3-%231572B6.svg?style=flat&logo=css3&logoColor=white',
+                'tailwind': 'tailwindcss-%2338B2AC.svg?style=flat&logo=tailwind-css&logoColor=white',
+                'node': 'node.js-6DA55F?style=flat&logo=node.js&logoColor=white',
+                'nextjs': 'Next-black?style=flat&logo=next.js&logoColor=white'
+            };
+            const url = logos[topic.toLowerCase()] || `${topic}-blue?style=flat&logo=github`;
+            return `<img src="https://img.shields.io/badge/${url}" alt="${topic}" class="h-5 tech-badge rounded-sm">`;
+        };
 
-const editorUrl = repo.html_url.replace('github.com', 'github.dev');
+        const badgesHtml = repo.topics && repo.topics.length > 0
+            ? `<div class="flex flex-wrap gap-1.5 mb-4 overflow-hidden h-6">
+                ${repo.topics.slice(0, 4).map(t => generateBadge(t)).join('')}
+               </div>`
+            : '<div class="h-6 mb-4"></div>';
 
-// 2. Reemplaza todo el card.innerHTML con esto:
-card.innerHTML = `
+        // HTML Definitivo de la Tarjeta
+        card.innerHTML = `
             <div class="flex justify-between items-start mb-4">
                 <div class="bg-white/5 p-2 rounded-lg border border-white/10 group-hover:bg-primary group-hover:text-black transition-colors">
                     <i data-lucide="folder" class="w-5 h-5"></i>
@@ -330,6 +322,8 @@ card.innerHTML = `
                     </a>
                 </div>
             </div>
+            
+            ${badgesHtml} 
             
             <h3 class="font-display text-lg mb-2 text-white group-hover:text-primary transition-colors uppercase leading-tight break-all">${repo.name}</h3>
             <p class="text-xs text-gray-400 mb-6 flex-1 truncate-2-lines leading-relaxed">${repo.description || 'Sin descripción disponible.'}</p>
@@ -617,4 +611,13 @@ async function copyCloneCommand(url, btn) {
         console.error('Error al copiar:', err);
         alert('No se pudo copiar al portapapeles');
     }
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
 }
